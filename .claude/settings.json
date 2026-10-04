@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:leanprover.zulipchat.com)",
+      "Bash(curl:*)",
+      "Bash(git clone:*)",
+      "Bash(git fetch:*)",
+      "Bash(git ls-remote:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "mcp__claude-code-remote__add_repo",
+      "mcp__claude-code-remote__create_trigger",
+      "mcp__claude-code-remote__update_trigger",
+      "mcp__claude-code-remote__delete_trigger"
+    ]
+  }
+}
