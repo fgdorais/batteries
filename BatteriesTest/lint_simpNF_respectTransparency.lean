@@ -4,7 +4,6 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Kim Morrison
 -/
 import Batteries.Linter
-import Batteries.Linter
 
 set_option linter.missingDocs false
 
@@ -37,7 +36,7 @@ private theorem Bundle.of_op {X : Type} [MyClass X] :
     @MyClass.op (Bundle.of X).carrier (Bundle.of X).inst = @MyClass.op X _ := rfl
 
 /--
-error: -- Found 1 error in 0 declarations (plus 31 automatically generated ones) in the current file with 1 linters
+error: -- Found 1 error in 12 declarations (plus 19 automatically generated ones) in the current file with 1 linters
 
 /- The `simpNF` linter reports:
 SOME SIMP LEMMAS ARE NOT IN SIMP-NORMAL FORM.

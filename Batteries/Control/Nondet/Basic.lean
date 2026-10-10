@@ -5,11 +5,11 @@ Authors: Kim Morrison
 -/
 module
 
-public import Batteries.Linter.Misc
+import Batteries.Linter.Misc
 public import Batteries.Data.MLList.Basic
-import Lean.Util.MonadBacktrack
+public import Lean.Util.MonadBacktrack
 
-@[expose] public section
+public section
 
 /-!
 # A nondeterminism monad.

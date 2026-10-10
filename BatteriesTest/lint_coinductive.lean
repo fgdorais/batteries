@@ -1,5 +1,4 @@
 import Batteries.Linter
-import Batteries.Linter
 
 /-! Tests that linters skip auto-generated declarations from coinductive predicates. -/
 
@@ -16,9 +15,6 @@ mutual
   inductive tock : Prop where
   | mk : ¬tick → tock
 end
-
-#guard_msgs in
-#lint- only defLemma
 
 #guard_msgs in
 #lint- only docBlame

@@ -1,5 +1,4 @@
 import Batteries.Linter
-import Batteries.Linter
 
 set_option linter.missingDocs false
 
@@ -23,7 +22,7 @@ def sumCompl {α : Type _} (p : α → Prop) [DecidablePred p] :
 @[simp]
 theorem sumCompl_apply_symm_of_pos (p : α → Prop) [DecidablePred p] (a : α) (h : p a) :
     (sumCompl p).symm a = Sum.inl ⟨a, h⟩ :=
-  dif_pos h
+  dite_eq_left h
 
 def foo (n : Nat) : Nat := if n = n then n else 0
 

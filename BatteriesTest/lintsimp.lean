@@ -1,5 +1,4 @@
 import Batteries.Linter
-import Batteries.Linter
 
 open Batteries.Linter
 set_option linter.missingDocs false

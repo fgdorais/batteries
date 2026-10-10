@@ -2,7 +2,6 @@ import Lean.Elab.Tactic.Rfl
 -- Adaptation note: we should be able to remove this import after nightly-2024-03-19
 
 set_option linter.missingDocs false
-set_option linter.defProp false
 
 example (a : Nat) : a = a := rfl
 
@@ -13,7 +12,7 @@ open Setoid
 universe u
 variable {α : Sort u} [Setoid α]
 
-@[refl] def iseqv_refl (a : α) : a ≈ a :=
+@[refl] theorem iseqv_refl (a : α) : a ≈ a :=
   iseqv.refl a
 
 example (a : α) : a ≈ a := by rfl

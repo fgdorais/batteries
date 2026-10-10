@@ -5,7 +5,8 @@ Authors: Shing Tak Lam, Daniel Selsam, Mario Carneiro
 -/
 module
 
-public import Batteries.Linter.Misc
+public meta import Lean.Environment
+import Batteries.Linter.Misc
 
 namespace Lean
 
