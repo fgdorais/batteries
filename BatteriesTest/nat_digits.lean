@@ -23,6 +23,8 @@ open Nat
 #guard toFinDigits 123 10 == ([1,2,3] : List (Fin 10))
 #guard toFinDigits 4 2 == ([1,0,0] : List (Fin 2))
 #guard toFinDigits 0 12345 == ([] : List (Fin 12345))
+#guard toFinDigits 5 1 == ([] : List (Fin 1))
+#guard toFinDigits 0 0 == ([] : List (Fin 0))
 
 /-! ## Large inputs -/
 

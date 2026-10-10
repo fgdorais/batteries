@@ -51,20 +51,20 @@ toFinDigitsUpTo 12345 1 5 = ([0,0,0,0,0] : List (Fin 1))
   | prec+1 => toFinDigitsUpTo (n / base) base prec ++ [Fin.ofNat base n]
 
 /--
-Big-endian list of digits of a natural number `n` in a given `base`. The base must be at least 2,
-a tactic attempts to infer this fact from the context but it may need to be provided as a third
-argument when the tactic fails.
+Big-endian list of digits of a natural number `n` in a given `base`.
 
 When `n` is zero, the result is the empty list. Otherwise, the most significant digit is nonzero.
+The base should be at least 2, the result is always the empty list in "base 0" and "base 1".
 ```
 toFinDigits 123 10 = ([1,2,3] : List (Fin 10))
 toFinDigits 4 2 = ([1,0,0] : List (Fin 2))
 toFinDigits 0 12345 = ([] : List (Fin 12345))
 ```
 -/
-public def toFinDigits (n base : Nat) (hbase : 2 ≤ base := by omega) : List (Fin base) :=
-  have : NeZero base := ⟨by omega⟩
-  if n = 0 then [] else toFinDigits (n / base) base ++ [Fin.ofNat base n]
+public def toFinDigits (n base : Nat) : List (Fin base) :=
+  if h : n = 0 ∨ base < 2 then [] else
+    have : NeZero base := ⟨by omega⟩
+    toFinDigits (n / base) base ++ [Fin.ofNat base n]
 decreasing_by exact Nat.div_lt_self (by omega) (by omega)
 
 /-! ### Lemmas -/
@@ -117,12 +117,12 @@ public theorem toFinDigitsUpTo_add [NeZero base] : toFinDigitsUpTo n base (prec 
     congr 3
     ext; simp [Nat.mod_mul_right_mod]
 
-public theorem toFinDigits_zero (h : 2 ≤ base) : toFinDigits 0 base = [] := by
-  rw [toFinDigits, ite_eq_left rfl]
+public theorem toFinDigits_zero : toFinDigits 0 base = [] := by
+  rw [toFinDigits, dite_eq_left (.inl rfl)]
 
 public theorem toFinDigits_of_ne_zero (h : 2 ≤ base) [NeZero base] (hn : n ≠ 0) :
     toFinDigits n base = toFinDigits (n / base) base ++ [Fin.ofNat base n] := by
-  rw [toFinDigits, ite_eq_right hn]
+  rw [toFinDigits, dite_eq_right (by omega)]
 
 @[simp] public theorem ofFinDigits_toFinDigits (h : 2 ≤ base) :
     ofFinDigits (toFinDigits n base) = n := by
@@ -200,25 +200,25 @@ private theorem toFinDigitsUpToImpl.loopSplit_eq [NeZero base] {acc : List (Fin 
   rw [toFinDigitsUpToImpl, toFinDigitsUpToImpl.loopSplit_eq, List.append_nil]
 
 /-- Divide-and-conquer implementation of `toFinDigits`. -/
-public def toFinDigitsImpl (n base : Nat) (hbase : 2 ≤ base := by omega) : List (Fin base) :=
-  loopSplit n []
+public def toFinDigitsImpl (n base : Nat) : List (Fin base) :=
+  if hbase : base < 2 then [] else loopSplit base (by omega) n []
 where
   /-- Prepends `toFinDigits n base` to `acc`. -/
-  loopSplit (n : Nat) (acc : List (Fin base)) : List (Fin base) :=
+  loopSplit (base : Nat) (hbase : 2 ≤ base) (n : Nat) (acc : List (Fin base)) : List (Fin base) :=
     have : NeZero base := ⟨by omega⟩
     -- `k` is about half the number of digits, and `base ^ k ≤ n` whenever `0 < k`
     let k := n.log2 / (2 * base.log2 + 2)
     if h : 8 ≤ k ∧ base ^ k ≤ n then
       have : 1 < base ^ k := Nat.lt_of_lt_of_le hbase (Nat.le_self_pow (by omega) _)
       have : n / base ^ k < n := Nat.div_lt_self (by omega) this
-      loopSplit (n / base ^ k) (toFinDigitsUpTo (n % base ^ k) base k ++ acc)
+      loopSplit base hbase (n / base ^ k) (toFinDigitsUpTo (n % base ^ k) base k ++ acc)
     else
-      loopDigit n acc
+      loopDigit base hbase n acc
   termination_by n
   /-- Prepends `toFinDigits n base` to `acc`, one digit at a time. -/
-  loopDigit (n : Nat) (acc : List (Fin base)) : List (Fin base) :=
+  loopDigit (base : Nat) (hbase : 2 ≤ base) (n : Nat) (acc : List (Fin base)) : List (Fin base) :=
     have : NeZero base := ⟨by omega⟩
-    if n = 0 then acc else loopDigit (n / base) (Fin.ofNat base n :: acc)
+    if n = 0 then acc else loopDigit base hbase (n / base) (Fin.ofNat base n :: acc)
   termination_by n
   decreasing_by exact Nat.div_lt_self (by omega) (by omega)
 
@@ -237,5 +237,8 @@ private theorem toFinDigitsImpl.loopSplit_eq (hbase : 2 ≤ base) {acc : List (F
   | case2 => exact loopDigit_eq hbase
 
 @[csimp] public theorem toFinDigits_eq_toFinDigitsImpl : @toFinDigits = @toFinDigitsImpl := by
-  funext n base hbase
-  rw [toFinDigitsImpl, toFinDigitsImpl.loopSplit_eq, List.append_nil]
+  funext n base
+  if hbase : base < 2 then
+    rw [toFinDigitsImpl, dite_eq_left hbase, toFinDigits, dite_eq_left (.inr hbase)]
+  else
+    rw [toFinDigitsImpl, dite_eq_right hbase, toFinDigitsImpl.loopSplit_eq, List.append_nil]
