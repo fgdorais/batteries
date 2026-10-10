@@ -149,6 +149,106 @@ public theorem toFinDigits_eq_append (h : 2 ≤ base) [NeZero base] (hk : base ^
     congr 3
     ext; simp [Nat.mod_mul_right_mod]
 
+/-- In "base 0" and "base 1", the only valid digits are zeros and `ofFinDigits` is always `0`. -/
+public theorem ofFinDigits_of_le_one (h : base ≤ 1) {l : List (Fin base)} :
+    ofFinDigits l = 0 := by
+  induction l with
+  | nil => rfl
+  | cons d l ih =>
+    have : d.val = 0 := by have := d.isLt; omega
+    simp [ih, this]
+
+/-- In "base 1", `toFinDigitsUpTo` is a list of zeros. -/
+public theorem toFinDigitsUpTo_one : toFinDigitsUpTo n 1 prec = List.replicate prec 0 := by
+  induction prec generalizing n with
+  | zero => rfl
+  | succ prec ih =>
+    rw [toFinDigitsUpTo_succ, ih, List.replicate_succ']
+    congr 2; exact Fin.ext (Nat.mod_one _)
+
+public theorem ofFinDigits_lt_pow {l : List (Fin base)} : ofFinDigits l < base ^ l.length := by
+  induction l with
+  | nil => simp
+  | cons d l ih =>
+    rw [ofFinDigits_cons, List.length_cons, Nat.pow_succ']
+    calc d * base ^ l.length + ofFinDigits l
+      _ < d * base ^ l.length + base ^ l.length := Nat.add_lt_add_left ih _
+      _ = (d + 1) * base ^ l.length := by rw [Nat.succ_mul]
+      _ ≤ base * base ^ l.length := Nat.mul_le_mul_right _ d.isLt
+
+@[simp] public theorem toFinDigitsUpTo_ofFinDigits [NeZero base] {l : List (Fin base)} :
+    toFinDigitsUpTo (ofFinDigits l) base l.length = l := by
+  induction l with
+  | nil => rfl
+  | cons d l ih =>
+    have hlt := ofFinDigits_lt_pow (l := l)
+    have hpos : 0 < base ^ l.length := Nat.pow_pos (Nat.pos_of_ne_zero (NeZero.ne base))
+    have hdiv : (d * base ^ l.length + ofFinDigits l) / base ^ l.length = d := by
+      rw [Nat.mul_comm, Nat.mul_add_div hpos, Nat.div_eq_of_lt hlt, Nat.add_zero]
+    have hmod : (d * base ^ l.length + ofFinDigits l) % base ^ l.length = ofFinDigits l := by
+      rw [Nat.mul_comm, Nat.mul_add_mod, Nat.mod_eq_of_lt hlt]
+    rw [ofFinDigits_cons, List.length_cons, Nat.add_comm l.length 1, toFinDigitsUpTo_add, hdiv,
+      hmod, ih]
+    simp [Nat.div_eq_of_lt d.isLt]
+
+/-- In "base 0" and "base 1", `toFinDigits` is always the empty list. -/
+public theorem toFinDigits_of_lt_two (h : base < 2) : toFinDigits n base = [] := by
+  rw [toFinDigits, dite_eq_left (.inr h)]
+
+@[simp] public theorem toFinDigits_eq_nil_iff : toFinDigits n base = [] ↔ n = 0 ∨ base < 2 := by
+  constructor
+  · intro h
+    rw [toFinDigits] at h
+    split at h
+    · assumption
+    · simp at h
+  · intro h
+    rw [toFinDigits, dite_eq_left h]
+
+/-- The most significant digit of `toFinDigits n base` is nonzero. -/
+public theorem toFinDigits_head?_ne_zero : ∀ d ∈ (toFinDigits n base).head?, d.val ≠ 0 := by
+  induction n using Nat.strongRecOn with
+  | ind n ih =>
+    if hn : n = 0 ∨ base < 2 then
+      simp [toFinDigits_eq_nil_iff.2 hn]
+    else
+      have h : 2 ≤ base := by omega
+      have : NeZero base := ⟨by omega⟩
+      have hn : n ≠ 0 := by omega
+      rw [toFinDigits_of_ne_zero h hn]
+      intro d hd
+      rw [List.head?_append] at hd
+      cases hq : (toFinDigits (n / base) base).head? with
+      | some a =>
+        rw [hq, Option.some_or, Option.mem_def, Option.some_inj] at hd
+        exact hd ▸ ih _ (Nat.div_lt_self (by omega) h) a hq
+      | none =>
+        rw [List.head?_eq_none_iff, toFinDigits_eq_nil_iff] at hq
+        have : n < base := by
+          rw [← Nat.div_eq_zero_iff_lt (by omega)]; omega
+        rw [List.head?_eq_none_iff.2 (toFinDigits_eq_nil_iff.2 hq)] at hd
+        simp only [Option.none_or, List.head?_cons, Option.mem_def, Option.some_inj] at hd
+        rw [← hd, Fin.val_ofNat, Nat.mod_eq_of_lt this]; exact hn
+
+public theorem toFinDigits_ofFinDigits (h : 2 ≤ base) {l : List (Fin base)}
+    (hl : ∀ d ∈ l.head?, d.val ≠ 0) : toFinDigits (ofFinDigits l) base = l := by
+  have : NeZero base := ⟨by omega⟩
+  match l with
+  | [] => simp [toFinDigits_zero]
+  | d :: l =>
+    have hd : d.val ≠ 0 := hl d rfl
+    have hlt := ofFinDigits_lt_pow (l := l)
+    have hpos : 0 < base ^ l.length := Nat.pow_pos (by omega)
+    have hdiv : (d * base ^ l.length + ofFinDigits l) / base ^ l.length = d := by
+      rw [Nat.mul_comm, Nat.mul_add_div hpos, Nat.div_eq_of_lt hlt, Nat.add_zero]
+    have hmod : (d * base ^ l.length + ofFinDigits l) % base ^ l.length = ofFinDigits l := by
+      rw [Nat.mul_comm, Nat.mul_add_mod, Nat.mod_eq_of_lt hlt]
+    have hle : base ^ l.length ≤ d * base ^ l.length + ofFinDigits l :=
+      Nat.le_add_right_of_le (Nat.le_mul_of_pos_left _ (by omega))
+    rw [ofFinDigits_cons, toFinDigits_eq_append h hle, hdiv, hmod, toFinDigitsUpTo_ofFinDigits,
+      toFinDigits_of_ne_zero h hd, Nat.div_eq_of_lt d.isLt, toFinDigits_zero]
+    simp
+
 /-! ### Subquadratic implementations -/
 
 /-- Divide-and-conquer implementation of `ofFinDigits`. -/
