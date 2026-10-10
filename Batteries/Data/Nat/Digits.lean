@@ -7,7 +7,7 @@ module
 
 import Batteries.Tactic.Init
 
-@[expose] public section
+public section
 
 /-!
 # Big-endian digits
@@ -32,7 +32,7 @@ ofFinDigits (base := b) [] = 0 -- any base, including "base 0" and "base 1"
 There are no valid inputs other than `[]` in "base 0". In "base 1", the only valid digit is `0`
 and therefore `ofFinDigits (base := 1) l = 0`.
 -/
-def ofFinDigits (l : List (Fin base)) : Nat :=
+@[expose] def ofFinDigits (l : List (Fin base)) : Nat :=
   l.foldl (fun n d => n * base + d.val) 0
 
 /--
@@ -47,7 +47,7 @@ toFinDigitsUpTo 4 2 4 = ([0,1,0,0] : List (Fin 2))
 toFinDigitsUpTo 12345 1 5 = ([0,0,0,0,0] : List (Fin 1))
 ```
 -/
-def toFinDigitsUpTo (n base prec : Nat) [NeZero base] : List (Fin base) :=
+@[expose] def toFinDigitsUpTo (n base prec : Nat) [NeZero base] : List (Fin base) :=
   match prec with
   | 0 => []
   | prec+1 => toFinDigitsUpTo (n / base) base prec ++ [Fin.ofNat base n]
@@ -182,13 +182,13 @@ where
     | 0, acc => acc
     | prec+1, acc => loop (n / base) prec (Fin.ofNat base n :: acc)
 
-theorem toFinDigitsUpToImpl.loop_eq [NeZero base] {acc : List (Fin base)} :
+private theorem toFinDigitsUpToImpl.loop_eq [NeZero base] {acc : List (Fin base)} :
     loop base n prec acc = toFinDigitsUpTo n base prec ++ acc := by
   induction prec generalizing n acc with
   | zero => rfl
   | succ prec ih => simp [loop, ih]
 
-theorem toFinDigitsUpToImpl.go_eq [NeZero base] {acc : List (Fin base)} :
+private theorem toFinDigitsUpToImpl.go_eq [NeZero base] {acc : List (Fin base)} :
     go base n prec acc = toFinDigitsUpTo n base prec ++ acc := by
   fun_induction go base n prec acc with
   | case1 => exact loop_eq
@@ -224,14 +224,14 @@ where
   termination_by n
   decreasing_by exact Nat.div_lt_self (by omega) (by omega)
 
-theorem toFinDigitsImpl.loop_eq (hbase : 2 ≤ base) {acc : List (Fin base)} :
+private theorem toFinDigitsImpl.loop_eq (hbase : 2 ≤ base) {acc : List (Fin base)} :
     loop base hbase n acc = toFinDigits n base ++ acc := by
   have : NeZero base := ⟨by omega⟩
   fun_induction loop base hbase n acc with
   | case1 => rw [toFinDigits_zero, List.nil_append]
   | case2 n acc _ hn ih => rw [ih, toFinDigits_of_ne_zero hbase hn, List.append_assoc]; rfl
 
-theorem toFinDigitsImpl.go_eq (hbase : 2 ≤ base) {acc : List (Fin base)} :
+private theorem toFinDigitsImpl.go_eq (hbase : 2 ≤ base) {acc : List (Fin base)} :
     go base hbase n acc = toFinDigits n base ++ acc := by
   have : NeZero base := ⟨by omega⟩
   fun_induction go base hbase n acc with
