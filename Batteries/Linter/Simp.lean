@@ -11,6 +11,7 @@ import all Lean.Meta.Tactic.Simp.SimpTheorems
 public meta import Batteries.Linter.Basic
 public meta import Batteries.Util.LibraryNote
 import Lean.Meta.Tactic.Simp.Types
+import Batteries.Tactic.Alias
 
 public meta section
 open Lean Meta
@@ -294,3 +295,44 @@ Some commutativity lemmas are simp lemmas:"
     -- ensure that the second application makes progress:
     if ← isDefEq lhs' rhs' then return none
     pure m!"should not be marked simp"
+
+end Batteries.Linter
+
+/-! Deprecated aliases for the former `Batteries.Tactic.Lint` namespace. -/
+
+namespace Batteries.Tactic.Lint
+
+/-- Deprecated alias of `Batteries.Linter.SimpTheoremInfo`. -/
+@[deprecated Batteries.Linter.SimpTheoremInfo (since := "2026-10-10")]
+abbrev SimpTheoremInfo := Batteries.Linter.SimpTheoremInfo
+
+@[deprecated (since := "2026-10-10")]
+alias SimpTheoremInfo.mk := Batteries.Linter.SimpTheoremInfo.mk
+@[deprecated (since := "2026-10-10")]
+alias SimpTheoremInfo.hyps := Batteries.Linter.SimpTheoremInfo.hyps
+@[deprecated (since := "2026-10-10")]
+alias SimpTheoremInfo.lhs := Batteries.Linter.SimpTheoremInfo.lhs
+@[deprecated (since := "2026-10-10")]
+alias SimpTheoremInfo.rhs := Batteries.Linter.SimpTheoremInfo.rhs
+@[deprecated (since := "2026-10-10")]
+alias isCondition := Batteries.Linter.isCondition
+@[deprecated (since := "2026-10-10")]
+alias withSimpTheoremInfos := Batteries.Linter.withSimpTheoremInfos
+@[deprecated (since := "2026-10-10")]
+alias checkAllSimpTheoremInfos := Batteries.Linter.checkAllSimpTheoremInfos
+@[deprecated (since := "2026-10-10")]
+alias isSimpTheorem := Batteries.Linter.isSimpTheorem
+@[deprecated (since := "2026-10-10")]
+alias isSimpEq := Batteries.Linter.isSimpEq
+@[deprecated (since := "2026-10-10")]
+alias decorateError := Batteries.Linter.decorateError
+@[deprecated (since := "2026-10-10")]
+alias formatLemmas := Batteries.Linter.formatLemmas
+@[deprecated (since := "2026-10-10")]
+alias linter.simpNF.respectTransparency := Batteries.Linter.linter.simpNF.respectTransparency
+@[deprecated (since := "2026-10-10")]
+alias simpNF := Batteries.Linter.simpNF
+@[deprecated (since := "2026-10-10")]
+alias simpComm := Batteries.Linter.simpComm
+
+end Batteries.Tactic.Lint

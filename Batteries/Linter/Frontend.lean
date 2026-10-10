@@ -7,6 +7,7 @@ module
 
 public meta import Lean.Elab.Command
 public meta import Batteries.Linter.Basic
+import Batteries.Tactic.Alias
 
 public meta section
 
@@ -331,3 +332,48 @@ elab "#list_linters" : command => do
   logInfo msg
 
 initialize registerTraceClass `Batteries.Lint
+
+end Batteries.Linter
+
+/-! Deprecated aliases for the former `Batteries.Tactic.Lint` namespace. -/
+
+namespace Batteries.Tactic.Lint
+
+/-- Deprecated alias of `Batteries.Linter.LintVerbosity`. -/
+@[deprecated Batteries.Linter.LintVerbosity (since := "2026-10-10")]
+abbrev LintVerbosity := Batteries.Linter.LintVerbosity
+
+@[deprecated (since := "2026-10-10")]
+alias LintVerbosity.low := Batteries.Linter.LintVerbosity.low
+@[deprecated (since := "2026-10-10")]
+alias LintVerbosity.medium := Batteries.Linter.LintVerbosity.medium
+@[deprecated (since := "2026-10-10")]
+alias LintVerbosity.high := Batteries.Linter.LintVerbosity.high
+@[deprecated (since := "2026-10-10")]
+alias getChecks := Batteries.Linter.getChecks
+@[deprecated (since := "2026-10-10")]
+alias lintCore := Batteries.Linter.lintCore
+@[deprecated (since := "2026-10-10")]
+alias sortResults := Batteries.Linter.sortResults
+@[deprecated (since := "2026-10-10")]
+alias printWarning := Batteries.Linter.printWarning
+@[deprecated (since := "2026-10-10")]
+alias printWarnings := Batteries.Linter.printWarnings
+@[deprecated (since := "2026-10-10")]
+alias groupedByFilename := Batteries.Linter.groupedByFilename
+@[deprecated (since := "2026-10-10")]
+alias formatLinterResults := Batteries.Linter.formatLinterResults
+@[deprecated (since := "2026-10-10")]
+alias getDeclsInCurrModule := Batteries.Linter.getDeclsInCurrModule
+@[deprecated (since := "2026-10-10")]
+alias getAllDecls := Batteries.Linter.getAllDecls
+@[deprecated (since := "2026-10-10")]
+alias getDeclsInPackage := Batteries.Linter.getDeclsInPackage
+@[deprecated (since := "2026-10-10")]
+alias inProject := Batteries.Linter.inProject
+@[deprecated (since := "2026-10-10")]
+alias traceLintCore := Batteries.Linter.traceLintCore
+@[deprecated (since := "2026-10-10")]
+alias traceLint := Batteries.Linter.traceLint
+
+end Batteries.Tactic.Lint

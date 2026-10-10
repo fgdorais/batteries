@@ -10,6 +10,7 @@ public meta import Lean.Meta.Basic
 meta import Lean.Elab.InfoTree.Main
 meta import Lean.ExtraModUses
 import Lean.Structure
+import Batteries.Tactic.Alias
 
 public meta section
 
@@ -127,8 +128,13 @@ structure NamedLinter extends Linter where
   declName : Name
 
 /-- Gets a linter by declaration name. -/
-def getLinter (name declName : Name) : CoreM NamedLinter := unsafe
-  return { ← evalConstCheck Linter ``Linter declName with name, declName }
+def getLinter (name declName : Name) : CoreM NamedLinter := unsafe do
+  let constInfo ← getConstInfo declName
+  -- `isDefEq` rather than `evalConstCheck`, so that linters typed with the deprecated
+  -- `Batteries.Tactic.Lint.Linter` abbreviation are accepted
+  unless ← (isDefEq constInfo.type (mkConst ``Linter)).run' do
+    throwError "unexpected type at '{declName}', `{``Linter}` expected"
+  return { ← evalConst Linter declName with name, declName }
 
 /-- Defines the `env_linter` extension for adding a linter to the default set. -/
 initialize batteriesLinterExt :
@@ -199,3 +205,52 @@ initialize nolintAttr : ParametricAttribute (Array Name) ←
 using `linter`, i.e., if there is no `nolint` attribute. -/
 def shouldBeLinted [Monad m] [MonadEnv m] (linter : Name) (decl : Name) : m Bool :=
   return !((nolintAttr.getParam? (← getEnv) decl).getD #[]).contains linter
+
+end Batteries.Linter
+
+/-! Deprecated aliases for the former `Batteries.Tactic.Lint` namespace. -/
+
+namespace Batteries.Tactic.Lint
+
+/-- Deprecated alias of `Batteries.Linter`. -/
+@[deprecated Batteries.Linter (since := "2026-10-10")]
+abbrev Linter := Batteries.Linter
+
+/-- Deprecated alias of `Batteries.Linter.NamedLinter`. -/
+@[deprecated Batteries.Linter.NamedLinter (since := "2026-10-10")]
+abbrev NamedLinter := Batteries.Linter.NamedLinter
+
+@[deprecated (since := "2026-10-10")]
+alias Linter.mk := Batteries.Linter.mk
+@[deprecated (since := "2026-10-10")]
+alias Linter.test := Batteries.Linter.test
+@[deprecated (since := "2026-10-10")]
+alias Linter.noErrorsFound := Batteries.Linter.noErrorsFound
+@[deprecated (since := "2026-10-10")]
+alias Linter.errorsFound := Batteries.Linter.errorsFound
+@[deprecated (since := "2026-10-10")]
+alias Linter.isFast := Batteries.Linter.isFast
+@[deprecated (since := "2026-10-10")]
+alias Linter.isLocal := Batteries.Linter.isLocal
+@[deprecated (since := "2026-10-10")]
+alias NamedLinter.mk := Batteries.Linter.NamedLinter.mk
+@[deprecated (since := "2026-10-10")]
+alias NamedLinter.toLinter := Batteries.Linter.NamedLinter.toLinter
+@[deprecated (since := "2026-10-10")]
+alias NamedLinter.name := Batteries.Linter.NamedLinter.name
+@[deprecated (since := "2026-10-10")]
+alias NamedLinter.declName := Batteries.Linter.NamedLinter.declName
+@[deprecated (since := "2026-10-10")]
+alias isAutoDecl := Batteries.Linter.isAutoDecl
+@[deprecated (since := "2026-10-10")]
+alias isPrivateOrAutoDecl := Batteries.Linter.isPrivateOrAutoDecl
+@[deprecated (since := "2026-10-10")]
+alias getLinter := Batteries.Linter.getLinter
+@[deprecated (since := "2026-10-10")]
+alias batteriesLinterExt := Batteries.Linter.batteriesLinterExt
+@[deprecated (since := "2026-10-10")]
+alias nolintAttr := Batteries.Linter.nolintAttr
+@[deprecated (since := "2026-10-10")]
+alias shouldBeLinted := Batteries.Linter.shouldBeLinted
+
+end Batteries.Tactic.Lint

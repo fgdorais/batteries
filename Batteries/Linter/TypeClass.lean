@@ -8,6 +8,7 @@ module
 public meta import Lean.Meta.Instances
 public meta import Lean.Util.CollectFVars
 public meta import Batteries.Linter.Basic
+import Batteries.Tactic.Alias
 
 public meta section
 
@@ -53,3 +54,16 @@ A linter for checking if any declaration whose type is not a class is marked as 
     let info ← getConstInfo declName
     if !(← isClass? info.type).isSome then return "should not be an instance"
     return none
+
+end Batteries.Linter
+
+/-! Deprecated aliases for the former `Batteries.Tactic.Lint` namespace. -/
+
+namespace Batteries.Tactic.Lint
+
+@[deprecated (since := "2026-10-10")]
+alias impossibleInstance := Batteries.Linter.impossibleInstance
+@[deprecated (since := "2026-10-10")]
+alias nonClassInstance := Batteries.Linter.nonClassInstance
+
+end Batteries.Tactic.Lint

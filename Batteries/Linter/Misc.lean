@@ -11,6 +11,7 @@ public meta import Lean.Meta.Instances
 public meta import Lean.Linter.Deprecated
 public meta import Lean.DocString
 public meta import Batteries.Linter.Basic
+import Batteries.Tactic.Alias
 
 public meta section
 
@@ -236,3 +237,28 @@ variables should be implicit instead.
       if explicit.isEmpty then return none
       addMessageContextFull m!"should be made implicit: {
         MessageData.joinSep (explicit.toList.map (m!"{·}")) ", "}"
+
+end Batteries.Linter
+
+/-! Deprecated aliases for the former `Batteries.Tactic.Lint` namespace. -/
+
+namespace Batteries.Tactic.Lint
+
+@[deprecated (since := "2026-10-10")]
+alias checkType := Batteries.Linter.checkType
+@[deprecated (since := "2026-10-10")]
+alias docBlame := Batteries.Linter.docBlame
+@[deprecated (since := "2026-10-10")]
+alias docBlameThm := Batteries.Linter.docBlameThm
+@[deprecated (since := "2026-10-10")]
+alias explicitVarsOfIff := Batteries.Linter.explicitVarsOfIff
+@[deprecated (since := "2026-10-10")]
+alias findUnusedHaves := Batteries.Linter.findUnusedHaves
+@[deprecated (since := "2026-10-10")]
+alias synTaut := Batteries.Linter.synTaut
+@[deprecated (since := "2026-10-10")]
+alias unusedArguments := Batteries.Linter.unusedArguments
+@[deprecated (since := "2026-10-10")]
+alias unusedHavesSuffices := Batteries.Linter.unusedHavesSuffices
+
+end Batteries.Tactic.Lint
