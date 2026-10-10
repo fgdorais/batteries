@@ -167,29 +167,29 @@ termination_by l.length
 
 /-- Divide-and-conquer implementation of `toFinDigitsUpTo`. -/
 public def toFinDigitsUpToImpl (n base prec : Nat) [NeZero base] : List (Fin base) :=
-  go n prec []
+  loopSplit n prec []
 where
   /-- Prepends `toFinDigitsUpTo n base prec` to `acc`. -/
-  go (n prec : Nat) (acc : List (Fin base)) : List (Fin base) :=
-    if prec ≤ 16 then loop n prec acc else
+  loopSplit (n prec : Nat) (acc : List (Fin base)) : List (Fin base) :=
+    if prec ≤ 16 then loopDigit n prec acc else
       let k := prec / 2
-      go (n / base ^ k) (prec - k) (go (n % base ^ k) k acc)
+      loopSplit (n / base ^ k) (prec - k) (loopSplit (n % base ^ k) k acc)
   termination_by prec
   /-- Prepends `toFinDigitsUpTo n base prec` to `acc`, one digit at a time. -/
-  loop (n : Nat) : Nat → List (Fin base) → List (Fin base)
+  loopDigit (n : Nat) : Nat → List (Fin base) → List (Fin base)
     | 0, acc => acc
-    | prec+1, acc => loop (n / base) prec (Fin.ofNat base n :: acc)
+    | prec+1, acc => loopDigit (n / base) prec (Fin.ofNat base n :: acc)
 
-private theorem toFinDigitsUpToImpl.loop_eq [NeZero base] {acc : List (Fin base)} :
-    loop base n prec acc = toFinDigitsUpTo n base prec ++ acc := by
+private theorem toFinDigitsUpToImpl.loopDigit_eq [NeZero base] {acc : List (Fin base)} :
+    loopDigit base n prec acc = toFinDigitsUpTo n base prec ++ acc := by
   induction prec generalizing n acc with
   | zero => rfl
-  | succ prec ih => simp [loop, ih]
+  | succ prec ih => simp [loopDigit, ih]
 
-private theorem toFinDigitsUpToImpl.go_eq [NeZero base] {acc : List (Fin base)} :
-    go base n prec acc = toFinDigitsUpTo n base prec ++ acc := by
-  fun_induction go base n prec acc with
-  | case1 => exact loop_eq
+private theorem toFinDigitsUpToImpl.loopSplit_eq [NeZero base] {acc : List (Fin base)} :
+    loopSplit base n prec acc = toFinDigitsUpTo n base prec ++ acc := by
+  fun_induction loopSplit base n prec acc with
+  | case1 => exact loopDigit_eq
   | case2 n prec acc _ k ih₁ _ ih₂ =>
     rw [ih₂, ih₁, ← List.append_assoc, ← toFinDigitsUpTo_add,
       Nat.sub_add_cancel (Nat.div_le_self ..)]
@@ -197,48 +197,48 @@ private theorem toFinDigitsUpToImpl.go_eq [NeZero base] {acc : List (Fin base)} 
 @[csimp] public theorem toFinDigitsUpTo_eq_toFinDigitsUpToImpl :
     @toFinDigitsUpTo = @toFinDigitsUpToImpl := by
   funext n base prec _
-  rw [toFinDigitsUpToImpl, toFinDigitsUpToImpl.go_eq, List.append_nil]
+  rw [toFinDigitsUpToImpl, toFinDigitsUpToImpl.loopSplit_eq, List.append_nil]
 
 /-- Divide-and-conquer implementation of `toFinDigits`. -/
 public def toFinDigitsImpl (n base : Nat) : List (Fin base) :=
-  if hbase : base < 2 then [] else go base (by omega) n []
+  if hbase : base < 2 then [] else loopSplit base (by omega) n []
 where
   /-- Prepends `toFinDigits n base` to `acc`. -/
-  go (base : Nat) (hbase : 2 ≤ base) (n : Nat) (acc : List (Fin base)) : List (Fin base) :=
+  loopSplit (base : Nat) (hbase : 2 ≤ base) (n : Nat) (acc : List (Fin base)) : List (Fin base) :=
     have : NeZero base := ⟨by omega⟩
     -- `k` is about half the number of digits, and `base ^ k ≤ n` whenever `0 < k`
     let k := n.log2 / (2 * base.log2 + 2)
     if h : 8 ≤ k ∧ base ^ k ≤ n then
       have : 1 < base ^ k := Nat.lt_of_lt_of_le hbase (Nat.le_self_pow (by omega) _)
       have : n / base ^ k < n := Nat.div_lt_self (by omega) this
-      go base hbase (n / base ^ k) (toFinDigitsUpTo (n % base ^ k) base k ++ acc)
+      loopSplit base hbase (n / base ^ k) (toFinDigitsUpTo (n % base ^ k) base k ++ acc)
     else
-      loop base hbase n acc
+      loopDigit base hbase n acc
   termination_by n
   /-- Prepends `toFinDigits n base` to `acc`, one digit at a time. -/
-  loop (base : Nat) (hbase : 2 ≤ base) (n : Nat) (acc : List (Fin base)) : List (Fin base) :=
+  loopDigit (base : Nat) (hbase : 2 ≤ base) (n : Nat) (acc : List (Fin base)) : List (Fin base) :=
     have : NeZero base := ⟨by omega⟩
-    if n = 0 then acc else loop base hbase (n / base) (Fin.ofNat base n :: acc)
+    if n = 0 then acc else loopDigit base hbase (n / base) (Fin.ofNat base n :: acc)
   termination_by n
   decreasing_by exact Nat.div_lt_self (by omega) (by omega)
 
-private theorem toFinDigitsImpl.loop_eq (hbase : 2 ≤ base) {acc : List (Fin base)} :
-    loop base hbase n acc = toFinDigits n base ++ acc := by
+private theorem toFinDigitsImpl.loopDigit_eq (hbase : 2 ≤ base) {acc : List (Fin base)} :
+    loopDigit base hbase n acc = toFinDigits n base ++ acc := by
   have : NeZero base := ⟨by omega⟩
-  fun_induction loop base hbase n acc with
+  fun_induction loopDigit base hbase n acc with
   | case1 => rw [toFinDigits_zero, List.nil_append]
   | case2 n acc _ hn ih => rw [ih, toFinDigits_of_ne_zero hbase hn, List.append_assoc]; rfl
 
-private theorem toFinDigitsImpl.go_eq (hbase : 2 ≤ base) {acc : List (Fin base)} :
-    go base hbase n acc = toFinDigits n base ++ acc := by
+private theorem toFinDigitsImpl.loopSplit_eq (hbase : 2 ≤ base) {acc : List (Fin base)} :
+    loopSplit base hbase n acc = toFinDigits n base ++ acc := by
   have : NeZero base := ⟨by omega⟩
-  fun_induction go base hbase n acc with
+  fun_induction loopSplit base hbase n acc with
   | case1 n acc _ k hk _ _ ih => rw [ih, toFinDigits_eq_append hbase hk.2, List.append_assoc]
-  | case2 => exact loop_eq hbase
+  | case2 => exact loopDigit_eq hbase
 
 @[csimp] public theorem toFinDigits_eq_toFinDigitsImpl : @toFinDigits = @toFinDigitsImpl := by
   funext n base
   if hbase : base < 2 then
     rw [toFinDigitsImpl, dite_eq_left hbase, toFinDigits, dite_eq_left (.inr hbase)]
   else
-    rw [toFinDigitsImpl, dite_eq_right hbase, toFinDigitsImpl.go_eq, List.append_nil]
+    rw [toFinDigitsImpl, dite_eq_right hbase, toFinDigitsImpl.loopSplit_eq, List.append_nil]
