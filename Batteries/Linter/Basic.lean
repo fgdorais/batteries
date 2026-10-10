@@ -16,6 +16,7 @@ public meta section
 open Lean Meta
 
 namespace Batteries.Linter
+
 /-!
 # Basic linter types and attributes
 
