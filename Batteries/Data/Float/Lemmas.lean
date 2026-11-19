@@ -304,32 +304,32 @@ theorem lt_irrefl (a : UnpackedFloat) : ¬ a.lt a := by
   cases_uf a <;> simp
 
 theorem lt_asymm {a b : UnpackedFloat} : a.lt b → ¬ b.lt a := by
-  cases_uf a <;> cases_uf b <;> simp <;> omega
+  cases_uf a <;> cases_uf b <;> simp <;> lia
 
 theorem lt_trans {a b c : UnpackedFloat} : a.lt b → b.lt c → a.lt c := by
-  cases_uf a <;> cases_uf b <;> cases_uf c <;> simp <;> omega
+  cases_uf a <;> cases_uf b <;> cases_uf c <;> simp <;> lia
 
 theorem le_trans {a b c : UnpackedFloat} : a.le b → b.le c → a.le c := by
-  cases_uf a <;> cases_uf b <;> cases_uf c <;> simp <;> omega
+  cases_uf a <;> cases_uf b <;> cases_uf c <;> simp <;> lia
 
 theorem lt_of_lt_of_le {a b c : UnpackedFloat} : a.lt b → b.le c → a.lt c := by
-  cases_uf a <;> cases_uf b <;> cases_uf c <;> simp <;> omega
+  cases_uf a <;> cases_uf b <;> cases_uf c <;> simp <;> lia
 
 theorem lt_of_le_of_lt {a b c : UnpackedFloat} : a.le b → b.lt c → a.lt c := by
-  cases_uf a <;> cases_uf b <;> cases_uf c <;> simp <;> omega
+  cases_uf a <;> cases_uf b <;> cases_uf c <;> simp <;> lia
 
 theorem le_of_lt {a b : UnpackedFloat} : a.lt b → a.le b := by
-  cases_uf a <;> cases_uf b <;> simp <;> omega
+  cases_uf a <;> cases_uf b <;> simp <;> lia
 
 theorem lt_iff_le_not_ge {a b : UnpackedFloat} : a.lt b ↔ a.le b ∧ ¬ b.le a := by
-  cases_uf a <;> cases_uf b <;> simp <;> omega
+  cases_uf a <;> cases_uf b <;> simp <;> lia
 
 theorem le_refl_iff {a : UnpackedFloat} : a.le a ↔ a ≠ notANumber := by
   cases_uf a <;> simp
 
 theorem not_le {a b : UnpackedFloat} (ha : a ≠ notANumber) (hb : b ≠ notANumber) :
     ¬ a.le b ↔ b.lt a := by
-  cases_uf a <;> cases_uf b <;> simp at ha hb ⊢ <;> omega
+  cases_uf a <;> cases_uf b <;> simp at ha hb ⊢ <;> lia
 
 @[simp] theorem notANumber_le (a : UnpackedFloat) : notANumber.le a = false := rfl
 @[simp] theorem le_notANumber (a : UnpackedFloat) : a.le notANumber = false := by cases a <;> rfl
@@ -337,18 +337,18 @@ theorem not_le {a b : UnpackedFloat} (ha : a ≠ notANumber) (hb : b ≠ notANum
 @[simp] theorem lt_notANumber (a : UnpackedFloat) : a.lt notANumber = false := by cases a <;> rfl
 
 theorem neg_lt_neg (a b : UnpackedFloat) : a.neg.lt b.neg = b.lt a := by
-  cases_uf a <;> cases_uf b <;> simp [neg] <;> omega
+  cases_uf a <;> cases_uf b <;> simp [neg] <;> lia
 
 theorem neg_le_neg (a b : UnpackedFloat) : a.neg.le b.neg = b.le a := by
-  cases_uf a <;> cases_uf b <;> simp [neg] <;> omega
+  cases_uf a <;> cases_uf b <;> simp [neg] <;> lia
 
 theorem minimum_comm (a b : UnpackedFloat) : a.minimum b = b.minimum a := by
   cases_uf a <;> cases_uf b <;> simp [minimum] <;> split <;> split <;>
-    first | rfl | (exfalso; omega) | (congr 1 <;> omega)
+    first | rfl | (exfalso; lia) | (congr 1 <;> lia)
 
 theorem maximum_comm (a b : UnpackedFloat) : a.maximum b = b.maximum a := by
   cases_uf a <;> cases_uf b <;> simp [maximum] <;> split <;> split <;>
-    first | rfl | (exfalso; omega) | (congr 1 <;> omega)
+    first | rfl | (exfalso; lia) | (congr 1 <;> lia)
 
 end
 
