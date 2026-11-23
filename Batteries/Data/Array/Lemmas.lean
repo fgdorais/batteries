@@ -6,6 +6,7 @@ Authors: Mario Carneiro, Gabriel Ebner
 -/
 module
 
+public import Batteries.Data.Array.Basic
 public import Batteries.Data.List.Basic
 import Batteries.Data.List.Lemmas
 
